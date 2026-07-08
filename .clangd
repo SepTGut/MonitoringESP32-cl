@@ -1,0 +1,11 @@
+CompileFlags:
+  Remove:
+    - -mlongcalls
+    - -fstrict-volatile-bitfields
+    - -fno-tree-switch-conversion
+    - -fno-rtti
+  Add:
+    - -Wno-unknown-argument
+    - -Wno-unknown-warning-option
+    - --target=xtensa-esp32-elf
+  CompilationDatabase: .

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "author": "Antigravity",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-ds18b20",
+      "id": "temp_sensor",
+      "top": -120,
+      "left": 120,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "esp:GND.1", "temp_sensor:GND", "black", [ "h0" ] ],
+    [ "esp:3V3", "temp_sensor:VDD", "red", [ "h0" ] ],
+    [ "esp:4", "temp_sensor:DQ", "blue", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
