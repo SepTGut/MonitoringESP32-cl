@@ -329,7 +329,7 @@
 
     // --- Settings: Load Config from ESP32 ---
     function loadConfig() {
-        fetch('/api/config')
+        apiFetch('/api/config')
             .then(r => r.json())
             .then(data => {
                 if (data.ssid != null)    dom.cfgSsid.value = data.ssid;
@@ -349,7 +349,7 @@
 
     // --- Settings: Load System Info ---
     function loadSysInfo() {
-        fetch('/api/sysinfo')
+        apiFetch('/api/sysinfo')
             .then(r => r.json())
             .then(data => {
                 if (data.fw != null)      dom.sysFw.textContent = data.fw;
@@ -374,7 +374,7 @@
         if (dom.cfgMaxRpm.value)  payload.maxRPM = parseInt(dom.cfgMaxRpm.value, 10);
         if (dom.cfgMaxTemp.value) payload.maxTemp = parseInt(dom.cfgMaxTemp.value, 10);
 
-        fetch('/api/config', {
+        apiFetch('/api/config', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -401,7 +401,7 @@
     dom.btnRestart.addEventListener('click', () => {
         if (!confirm('Restart the device? You will be disconnected briefly.')) return;
 
-        fetch('/api/restart', { method: 'POST' })
+        apiFetch('/api/restart', { method: 'POST' })
             .then(() => {
                 showToast('Device restarting...', 'success');
                 setTimeout(() => { window.location.reload(); }, 5000);
