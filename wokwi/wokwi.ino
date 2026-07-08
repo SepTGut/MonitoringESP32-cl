@@ -17,8 +17,12 @@
 #define PIN_ZMPT101B 32  // ADC1_CH4
 #define PIN_I2C_SDA  21
 #define PIN_I2C_SCL  22
-#define PIN_BLDC_HALL 34
+#define PIN_BLDC_HALL_A 34
+#define PIN_BLDC_HALL_B 35
+#define PIN_BLDC_HALL_C 39
+#define BLDC_HALL_COUNT 3
 #define PIN_DS18B20  4
+
 
 // ====================================================================
 // WEB DASHBOARD ASSETS (Embedded directly in flash for easy simulation)
@@ -1588,29 +1592,46 @@ private:
 };
 
 // --- 3. BLDC Hall RPM Sensor ---
+#define MAX_HALL_SENSORS 3
+
 class BLDCHall {
 public:
-    BLDCHall(uint8_t pin, uint8_t poles) : _pin(pin), _poles(poles) {
-        _lastCalculateTime = 0;
-        _lastPulseCount = 0;
+    BLDCHall(uint8_t pin, uint8_t poles)
+        : _numSensors(1), _poles(poles), _lastCalculateTime(0), _lastPulseCount(0) {
+        _pins[0] = pin;
+        _pins[1] = 0;
+        _pins[2] = 0;
     }
-    
+
+    BLDCHall(const uint8_t* pins, uint8_t numSensors, uint8_t poles)
+        : _numSensors(numSensors > MAX_HALL_SENSORS ? MAX_HALL_SENSORS : numSensors),
+          _poles(poles), _lastCalculateTime(0), _lastPulseCount(0) {
+        for (uint8_t i = 0; i < _numSensors; i++) {
+            _pins[i] = pins[i];
+        }
+    }
+
     void begin() {
-        pinMode(_pin, INPUT_PULLUP);
-        attachInterrupt(digitalPinToInterrupt(_pin), handleISR, RISING);
+        for (uint8_t i = 0; i < _numSensors; i++) {
+            pinMode(_pins[i], INPUT_PULLUP);
+        }
+        if (_numSensors >= 1) attachInterrupt(digitalPinToInterrupt(_pins[0]), handleISR0, RISING);
+        if (_numSensors >= 2) attachInterrupt(digitalPinToInterrupt(_pins[1]), handleISR1, RISING);
+        if (_numSensors >= 3) attachInterrupt(digitalPinToInterrupt(_pins[2]), handleISR2, RISING);
     }
-    
+
     void setPoles(uint8_t poles) { _poles = poles; }
-    
+
     float getRPM() {
         uint32_t currentMillis = millis();
         uint32_t currentPulses = pulseCount;
         uint32_t timeDelta = currentMillis - _lastCalculateTime;
-        
+
         if (timeDelta < 10) return 0.0f;
 
         uint32_t pulses = currentPulses - _lastPulseCount;
-        float rpm = ((float)pulses / timeDelta) * 1000.0f * 60.0f / (float)_poles;
+        float pulsesPerRev = (float)_poles * (float)_numSensors;
+        float rpm = ((float)pulses / timeDelta) * 1000.0f * 60.0f / pulsesPerRev;
 
         _lastCalculateTime = currentMillis;
         _lastPulseCount = currentPulses;
@@ -1623,16 +1644,16 @@ public:
         return rpm;
     }
 
-    static void IRAM_ATTR handleISR() {
-        pulseCount++;
-        lastPulseTime = millis();
-    }
+    static void IRAM_ATTR handleISR0() { pulseCount++; lastPulseTime = millis(); }
+    static void IRAM_ATTR handleISR1() { pulseCount++; lastPulseTime = millis(); }
+    static void IRAM_ATTR handleISR2() { pulseCount++; lastPulseTime = millis(); }
 
     static volatile uint32_t pulseCount;
     static volatile uint32_t lastPulseTime;
 
 private:
-    uint8_t _pin;
+    uint8_t _pins[MAX_HALL_SENSORS];
+    uint8_t _numSensors;
     uint8_t _poles;
     uint32_t _lastCalculateTime;
     uint32_t _lastPulseCount;
@@ -1641,9 +1662,6 @@ private:
 volatile uint32_t BLDCHall::pulseCount = 0;
 volatile uint32_t BLDCHall::lastPulseTime = 0;
 
-void IRAM_ATTR handleISR() {
-    BLDCHall::handleISR();
-}
 
 // --- 4. DS18B20 1-Wire Temperature Sensor ---
 class TemperatureSensor {
@@ -1919,8 +1937,10 @@ private:
         // Instantiate hardware drivers
         ZMPT101B zmpt(PIN_ZMPT101B);
         INA226Sensor ina(0x40, PIN_I2C_SDA, PIN_I2C_SCL);
-        BLDCHall hall(PIN_BLDC_HALL, configManager.getConfig().bldcPoles);
+        const uint8_t hallPins[BLDC_HALL_COUNT] = { PIN_BLDC_HALL_A, PIN_BLDC_HALL_B, PIN_BLDC_HALL_C };
+        BLDCHall hall(hallPins, BLDC_HALL_COUNT, configManager.getConfig().bldcPoles);
         TemperatureSensor temp(PIN_DS18B20);
+
 
         // Hardware initialization
         zmpt.begin();
