@@ -20,6 +20,59 @@
     let ws = null;
     let wsReconnectTimer = null;
 
+    // Check if running on GitHub Pages (static demo mode)
+    const isDemoMode = window.location.hostname.endsWith('.github.io') || 
+                       window.location.protocol === 'file:' ||
+                       window.location.search.includes('demo=true');
+
+    // Mock store for GitHub Pages config preview
+    let demoConfigStore = {
+        ssid: "Demo_SSID_AP",
+        pass: "12345678",
+        pollMs: 100,
+        wsPushMs: 500,
+        poles: 4,
+        maxV: 60,
+        maxA: 20,
+        maxRPM: 3000,
+        maxTemp: 100
+    };
+
+    // Client-side API fetch interceptor for static hosting
+    function apiFetch(url, options) {
+        if (isDemoMode) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    if (url === '/api/config' && options && options.method === 'POST') {
+                        const payload = JSON.parse(options.body);
+                        Object.assign(demoConfigStore, payload);
+                        resolve({
+                            json: () => Promise.resolve({ ok: true })
+                        });
+                    } else if (url === '/api/config') {
+                        resolve({
+                            json: () => Promise.resolve(demoConfigStore)
+                        });
+                    } else if (url === '/api/sysinfo') {
+                        resolve({
+                            json: () => Promise.resolve({
+                                fw: "v1.0.0-demo",
+                                heap: 245100,
+                                uptime: Math.floor(performance.now() / 1000),
+                                clients: 1
+                            })
+                        });
+                    } else if (url === '/api/restart') {
+                        resolve({
+                            json: () => Promise.resolve({ ok: true })
+                        });
+                    }
+                }, 200);
+            });
+        }
+        return fetch(url, options);
+    }
+
     // --- DOM Cache ---
     const $ = (id) => document.getElementById(id);
 
@@ -143,7 +196,40 @@
     }
 
     // --- WebSocket Connection ---
+    let demoInterval = null;
+    function startDemoSimulation() {
+        if (demoInterval) return;
+        setConnectionStatus(true);
+        if (dom.wsLabel) dom.wsLabel.textContent = 'Live (Demo)';
+
+        demoInterval = setInterval(() => {
+            const now = Date.now();
+            const dcVolt = 24.0 + 2.5 * Math.sin(now / 5000);
+            const dcCur = 5.0 + 3.0 * Math.sin(now / 3000);
+            const dcPwr = dcVolt * dcCur;
+            const acVolt = 220.0 + 10.0 * Math.sin(now / 4000);
+            const rpm = 1200.0 + 400.0 * Math.sin(now / 6000);
+            const temp = 42.5 + 3.5 * Math.sin(now / 8000);
+
+            const mockData = {
+                dcVolt: dcVolt,
+                dcCur: dcCur > 0 ? dcCur : 0,
+                dcPwr: dcPwr > 0 ? dcPwr : 0,
+                acVolt: acVolt,
+                rpm: rpm > 0 ? rpm : 0,
+                temp: temp,
+                uptime: Math.floor(performance.now() / 1000)
+            };
+            updateDashboard(mockData);
+        }, demoConfigStore.wsPushMs || 500);
+    }
+
     function connectWS() {
+        if (isDemoMode) {
+            startDemoSimulation();
+            return;
+        }
+
         if (ws && ws.readyState === WebSocket.OPEN) return;
 
         ws = new WebSocket(gateway);
