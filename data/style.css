@@ -1,5 +1,5 @@
 /* ====================================================================
-   WindMon — Premium Glassmorphism Dark UI Stylesheet
+   Monitor SaPa — Premium Glassmorphism Dark UI Stylesheet
    ==================================================================== */
 
 /* --- Google Font Import --- */
@@ -71,10 +71,61 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(45, 212, 191, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 40%);
     background-attachment: fixed;
+    position: relative;
+}
+
+/* Animated fluid background ambient glows */
+body::before {
+    content: '';
+    position: fixed;
+    top: -15%;
+    left: -15%;
+    width: 60vw;
+    height: 60vh;
+    background: radial-gradient(circle, rgba(45, 212, 191, 0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -2;
+    filter: blur(40px);
+    animation: drift-glow-1 25s ease-in-out infinite alternate;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -15%;
+    right: -15%;
+    width: 55vw;
+    height: 55vh;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -2;
+    filter: blur(40px);
+    animation: drift-glow-2 30s ease-in-out infinite alternate;
+}
+
+@keyframes drift-glow-1 {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(12%, 8%) scale(1.15);
+    }
+    100% {
+        transform: translate(-5%, 12%) scale(0.9);
+    }
+}
+
+@keyframes drift-glow-2 {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(-10%, -12%) scale(0.95);
+    }
+    100% {
+        transform: translate(10%, -5%) scale(1.15);
+    }
 }
 
 /* Custom Scrollbar */
@@ -132,7 +183,11 @@ body {
     height: 32px;
     color: var(--accent);
     filter: drop-shadow(0 0 8px var(--accent-glow));
-    animation: spin-slow 20s linear infinite;
+}
+
+.turbine-rotor {
+    transform-origin: 12px 12px;
+    animation: spin-slow 8s linear infinite;
 }
 
 @keyframes spin-slow {

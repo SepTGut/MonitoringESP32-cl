@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/dashboard_preview.png" alt="WindMon Dashboard Preview" width="720"/>
+  <img src="docs/images/dashboard_preview.png" alt="Monitor SaPa Dashboard Preview" width="720"/>
 </p>
 
 <h1 align="center">🌬️ Portable Wind Turbine Monitoring System</h1>
