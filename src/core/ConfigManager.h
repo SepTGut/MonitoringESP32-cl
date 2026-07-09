@@ -10,6 +10,20 @@ struct AppConfig {
     uint32_t wsPushMs;
     uint32_t bldcPoles;
     
+    // WiFi Station (STA) Client Mode configs
+    bool staEnabled;
+    char staSSID[33];
+    char staPass[64];
+
+    // MQTT Broker configs
+    bool mqttEnabled;
+    char mqttServer[64];
+    uint16_t mqttPort;
+    char mqttUser[33];
+    char mqttPass[64];
+    char mqttTopic[64];
+    uint32_t mqttInterval;
+
     // Display / Limit configs
     float maxV;
     float maxA;

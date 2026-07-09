@@ -32,6 +32,16 @@
         pollMs: 100,
         wsPushMs: 500,
         poles: 4,
+        staEnabled: false,
+        staSSID: "Demo_Home_WiFi",
+        staPass: "12345678",
+        mqttEnabled: false,
+        mqttServer: "broker.hivemq.com",
+        mqttPort: 1883,
+        mqttUser: "",
+        mqttPass: "",
+        mqttTopic: "sapa/turbine/metrics",
+        mqttInterval: 5000,
         maxV: 60,
         maxA: 20,
         maxRPM: 3000,
@@ -119,6 +129,21 @@
         cfgPoll:   $('cfg-poll'),
         cfgWsPush: $('cfg-ws-push'),
         cfgPoles:  $('cfg-poles'),
+
+        // WiFi STA inputs
+        cfgStaEnabled:  $('cfg-sta-enabled'),
+        cfgStaSsid:     $('cfg-sta-ssid'),
+        cfgStaPass:     $('cfg-sta-pass'),
+
+        // MQTT inputs
+        cfgMqttEnabled:  $('cfg-mqtt-enabled'),
+        cfgMqttServer:   $('cfg-mqtt-server'),
+        cfgMqttPort:     $('cfg-mqtt-port'),
+        cfgMqttUser:     $('cfg-mqtt-user'),
+        cfgMqttPass:     $('cfg-mqtt-pass'),
+        cfgMqttTopic:    $('cfg-mqtt-topic'),
+        cfgMqttInterval: $('cfg-mqtt-interval'),
+
         cfgMaxV:   $('cfg-max-v'),
         cfgMaxA:   $('cfg-max-a'),
         cfgMaxRpm: $('cfg-max-rpm'),
@@ -128,6 +153,7 @@
         btnSave:    $('btn-save-cfg'),
         btnRestart: $('btn-restart'),
         togglePass: $('toggle-pass'),
+        toggleStaPass: $('toggle-sta-pass'),
 
         // System info
         sysFw:      $('sys-fw'),
@@ -181,6 +207,10 @@
     // --- Password toggle ---
     dom.togglePass.addEventListener('click', () => {
         const inp = dom.cfgPass;
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+    dom.toggleStaPass.addEventListener('click', () => {
+        const inp = dom.cfgStaPass;
         inp.type = inp.type === 'password' ? 'text' : 'password';
     });
 
@@ -337,6 +367,21 @@
                 if (data.pollMs != null)  dom.cfgPoll.value = data.pollMs;
                 if (data.wsPushMs != null) dom.cfgWsPush.value = data.wsPushMs;
                 if (data.poles != null)   dom.cfgPoles.value = data.poles;
+
+                // WiFi STA configuration load
+                if (data.staEnabled != null)  dom.cfgStaEnabled.checked = data.staEnabled;
+                if (data.staSSID != null)     dom.cfgStaSsid.value = data.staSSID;
+                if (data.staPass != null)     dom.cfgStaPass.value = data.staPass;
+
+                // MQTT configuration load
+                if (data.mqttEnabled != null)  dom.cfgMqttEnabled.checked = data.mqttEnabled;
+                if (data.mqttServer != null)   dom.cfgMqttServer.value = data.mqttServer;
+                if (data.mqttPort != null)     dom.cfgMqttPort.value = data.mqttPort;
+                if (data.mqttUser != null)     dom.cfgMqttUser.value = data.mqttUser;
+                if (data.mqttPass != null)     dom.cfgMqttPass.value = data.mqttPass;
+                if (data.mqttTopic != null)    dom.cfgMqttTopic.value = data.mqttTopic;
+                if (data.mqttInterval != null) dom.cfgMqttInterval.value = data.mqttInterval;
+
                 if (data.maxV != null)    { dom.cfgMaxV.value = data.maxV; cfg.maxVoltage = data.maxV; }
                 if (data.maxA != null)    { dom.cfgMaxA.value = data.maxA; cfg.maxCurrent = data.maxA; }
                 if (data.maxRPM != null)  { dom.cfgMaxRpm.value = data.maxRPM; cfg.maxRPM = data.maxRPM; }
@@ -369,6 +414,21 @@
         if (dom.cfgPoll.value)    payload.pollMs = parseInt(dom.cfgPoll.value, 10);
         if (dom.cfgWsPush.value)  payload.wsPushMs = parseInt(dom.cfgWsPush.value, 10);
         if (dom.cfgPoles.value)   payload.poles = parseInt(dom.cfgPoles.value, 10);
+
+        // WiFi STA configuration save
+        payload.staEnabled = dom.cfgStaEnabled.checked;
+        payload.staSSID = dom.cfgStaSsid.value;
+        payload.staPass = dom.cfgStaPass.value;
+
+        // MQTT configuration save
+        payload.mqttEnabled = dom.cfgMqttEnabled.checked;
+        payload.mqttServer = dom.cfgMqttServer.value;
+        payload.mqttPort = parseInt(dom.cfgMqttPort.value, 10) || 1883;
+        payload.mqttUser = dom.cfgMqttUser.value;
+        payload.mqttPass = dom.cfgMqttPass.value;
+        payload.mqttTopic = dom.cfgMqttTopic.value;
+        payload.mqttInterval = parseInt(dom.cfgMqttInterval.value, 10) || 5000;
+
         if (dom.cfgMaxV.value)    payload.maxV = parseFloat(dom.cfgMaxV.value);
         if (dom.cfgMaxA.value)    payload.maxA = parseFloat(dom.cfgMaxA.value);
         if (dom.cfgMaxRpm.value)  payload.maxRPM = parseInt(dom.cfgMaxRpm.value, 10);

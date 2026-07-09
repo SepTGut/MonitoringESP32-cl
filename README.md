@@ -502,9 +502,12 @@ pio run -t uploadfs
 
 1. **Power on** the ESP32
 2. **Connect** your phone/laptop to the WiFi network:
-   - **SSID:** `WindTurbine_AP`
-   - **Password:** `12345678`
-3. **Open** a browser and navigate to: `http://192.168.4.1`
+   - **SSID:** `WindTurbine_AP` (or whatever SSID you saved)
+   - **Password:** `12345678` (or custom password)
+3. **Open the Dashboard:**
+   - **Captive Portal:** On most mobile devices and laptops, a login/portal page will automatically pop up displaying the dashboard directly.
+   - **mDNS Hostname:** Navigate to `http://spm.local/` in your browser.
+   - **IP Address:** Navigate to `http://192.168.4.1/` in your browser.
 4. **Monitor** live sensor data on the Dashboard tab
 5. **Configure** settings on the Settings tab
 

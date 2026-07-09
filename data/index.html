@@ -200,6 +200,41 @@
                         </div>
                     </div>
 
+                    <!-- WiFi Client Mode (STA) Settings -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                                <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                                <line x1="12" y1="20" x2="12.01" y2="20"/>
+                            </svg>
+                            <h3>WiFi Client Mode (STA)</h3>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="form-group" style="flex-direction: row; gap: 0.6rem; align-items: center;">
+                                <input type="checkbox" id="cfg-sta-enabled" style="width: auto; cursor: pointer;">
+                                <label for="cfg-sta-enabled" style="cursor: pointer; margin-bottom: 0;">Enable Client Mode (STA)</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-sta-ssid">Router SSID (Network Name)</label>
+                                <input type="text" id="cfg-sta-ssid" placeholder="Home_WiFi" maxlength="32">
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-sta-pass">Router Password</label>
+                                <div class="input-group">
+                                    <input type="password" id="cfg-sta-pass" placeholder="••••••••" maxlength="63">
+                                    <button class="input-addon" id="toggle-sta-pass" aria-label="Show router password">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Sensor Settings -->
                     <div class="settings-card">
                         <div class="settings-card-header">
@@ -257,6 +292,53 @@
                                     <label for="cfg-max-temp">Max Temp (&deg;C)</label>
                                     <input type="number" id="cfg-max-temp" placeholder="100" min="30" max="200" step="5">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MQTT Telemetry Settings -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                            <h3>MQTT Telemetry</h3>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="form-group" style="flex-direction: row; gap: 0.6rem; align-items: center;">
+                                <input type="checkbox" id="cfg-mqtt-enabled" style="width: auto; cursor: pointer;">
+                                <label for="cfg-mqtt-enabled" style="cursor: pointer; margin-bottom: 0;">Enable MQTT Publishing</label>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cfg-mqtt-server">Broker Server IP/Host</label>
+                                    <input type="text" id="cfg-mqtt-server" placeholder="192.168.1.100" maxlength="63">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cfg-mqtt-port">Broker Port</label>
+                                    <input type="number" id="cfg-mqtt-port" placeholder="1883" min="1" max="65535">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cfg-mqtt-user">Username (optional)</label>
+                                    <input type="text" id="cfg-mqtt-user" placeholder="User" maxlength="32">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cfg-mqtt-pass">Password (optional)</label>
+                                    <input type="password" id="cfg-mqtt-pass" placeholder="••••••••" maxlength="63">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-mqtt-topic">Publish Topic</label>
+                                <input type="text" id="cfg-mqtt-topic" placeholder="sapa/turbine/metrics" maxlength="63">
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-mqtt-interval">Publish Interval (ms)</label>
+                                <input type="number" id="cfg-mqtt-interval" placeholder="5000" min="500" max="3600000" step="500">
+                                <span class="form-hint">MQTT telemetry updates rate (500–3600000)</span>
                             </div>
                         </div>
                     </div>

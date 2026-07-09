@@ -20,13 +20,25 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 void DashboardServer::begin() {
     // Serve static files
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(LittleFS, "/index.html", "text/html");
+        if (LittleFS.exists("/index.html")) {
+            request->send(LittleFS, "/index.html", "text/html");
+        } else {
+            request->send(200, "text/html", "<h1>Monitor SaPa</h1><p>Error: index.html not found in LittleFS. Please upload filesystem assets using <code>pio run -t uploadfs</code>.</p>");
+        }
     });
     server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(LittleFS, "/style.css", "text/css");
+        if (LittleFS.exists("/style.css")) {
+            request->send(LittleFS, "/style.css", "text/css");
+        } else {
+            request->send(404, "text/plain", "style.css not found");
+        }
     });
     server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(LittleFS, "/script.js", "text/javascript");
+        if (LittleFS.exists("/script.js")) {
+            request->send(LittleFS, "/script.js", "text/javascript");
+        } else {
+            request->send(404, "text/plain", "script.js not found");
+        }
     });
 
     // --- API Endpoints ---
@@ -82,6 +94,20 @@ void DashboardServer::begin() {
     // Handle WebSocket
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
+
+    // Captive Portal Redirect Handler
+    server.onNotFound([](AsyncWebServerRequest *request){
+        String host = request->host();
+        if (host != "192.168.4.1" && host != "spm.local" && !host.endsWith(".local")) {
+            request->redirect("http://spm.local/");
+        } else {
+            if (LittleFS.exists("/index.html")) {
+                request->send(LittleFS, "/index.html", "text/html");
+            } else {
+                request->send(200, "text/html", "<h1>Monitor SaPa</h1><p>Error: index.html not found in LittleFS. Please upload filesystem assets using <code>pio run -t uploadfs</code>.</p>");
+            }
+        }
+    });
 
     server.begin();
 }

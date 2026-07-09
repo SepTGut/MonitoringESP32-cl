@@ -16,6 +16,20 @@ ConfigManager::ConfigManager() {
     _config.wsPushMs = WEBSOCKET_PUSH_MS;
     _config.bldcPoles = BLDC_POLES;
     
+    // Station and MQTT defaults
+    _config.staEnabled = false;
+    _config.staSSID[0] = '\0';
+    _config.staPass[0] = '\0';
+
+    _config.mqttEnabled = false;
+    _config.mqttServer[0] = '\0';
+    _config.mqttPort = 1883;
+    _config.mqttUser[0] = '\0';
+    _config.mqttPass[0] = '\0';
+    strncpy(_config.mqttTopic, "sapa/turbine/metrics", sizeof(_config.mqttTopic) - 1);
+    _config.mqttTopic[sizeof(_config.mqttTopic) - 1] = '\0';
+    _config.mqttInterval = 5000;
+
     _config.maxV = 60.0f;
     _config.maxA = 20.0f;
     _config.maxRPM = 3000;
@@ -101,6 +115,47 @@ void ConfigManager::updateFromJson(const JsonVariant& json) {
     if (json["poles"].is<uint32_t>()) {
         _config.bldcPoles = json["poles"];
     }
+
+    // WiFi STA config deserialization
+    if (json["staEnabled"].is<bool>()) {
+        _config.staEnabled = json["staEnabled"];
+    }
+    if (json["staSSID"].is<const char*>()) {
+        strncpy(_config.staSSID, json["staSSID"], sizeof(_config.staSSID) - 1);
+        _config.staSSID[sizeof(_config.staSSID) - 1] = '\0';
+    }
+    if (json["staPass"].is<const char*>()) {
+        strncpy(_config.staPass, json["staPass"], sizeof(_config.staPass) - 1);
+        _config.staPass[sizeof(_config.staPass) - 1] = '\0';
+    }
+
+    // MQTT config deserialization
+    if (json["mqttEnabled"].is<bool>()) {
+        _config.mqttEnabled = json["mqttEnabled"];
+    }
+    if (json["mqttServer"].is<const char*>()) {
+        strncpy(_config.mqttServer, json["mqttServer"], sizeof(_config.mqttServer) - 1);
+        _config.mqttServer[sizeof(_config.mqttServer) - 1] = '\0';
+    }
+    if (json["mqttPort"].is<uint16_t>()) {
+        _config.mqttPort = json["mqttPort"];
+    }
+    if (json["mqttUser"].is<const char*>()) {
+        strncpy(_config.mqttUser, json["mqttUser"], sizeof(_config.mqttUser) - 1);
+        _config.mqttUser[sizeof(_config.mqttUser) - 1] = '\0';
+    }
+    if (json["mqttPass"].is<const char*>()) {
+        strncpy(_config.mqttPass, json["mqttPass"], sizeof(_config.mqttPass) - 1);
+        _config.mqttPass[sizeof(_config.mqttPass) - 1] = '\0';
+    }
+    if (json["mqttTopic"].is<const char*>()) {
+        strncpy(_config.mqttTopic, json["mqttTopic"], sizeof(_config.mqttTopic) - 1);
+        _config.mqttTopic[sizeof(_config.mqttTopic) - 1] = '\0';
+    }
+    if (json["mqttInterval"].is<uint32_t>()) {
+        _config.mqttInterval = json["mqttInterval"];
+    }
+
     if (json["maxV"].is<float>()) {
         _config.maxV = json["maxV"];
     }
@@ -121,6 +176,21 @@ void ConfigManager::serialize(JsonDocument& doc) const {
     doc["pollMs"] = _config.sensorPollMs;
     doc["wsPushMs"] = _config.wsPushMs;
     doc["poles"] = _config.bldcPoles;
+
+    // WiFi STA config serialization
+    doc["staEnabled"] = _config.staEnabled;
+    doc["staSSID"] = _config.staSSID;
+    doc["staPass"] = _config.staPass;
+
+    // MQTT config serialization
+    doc["mqttEnabled"] = _config.mqttEnabled;
+    doc["mqttServer"] = _config.mqttServer;
+    doc["mqttPort"] = _config.mqttPort;
+    doc["mqttUser"] = _config.mqttUser;
+    doc["mqttPass"] = _config.mqttPass;
+    doc["mqttTopic"] = _config.mqttTopic;
+    doc["mqttInterval"] = _config.mqttInterval;
+
     doc["maxV"] = _config.maxV;
     doc["maxA"] = _config.maxA;
     doc["maxRPM"] = _config.maxRPM;
