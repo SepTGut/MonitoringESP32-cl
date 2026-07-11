@@ -91,7 +91,9 @@
 
     const dom = {
         // Dashboard values
-        dcPwr:   $('val-dcpwr'),
+        dcPwrCharge:    $('val-dcpwr-charge'),
+        dcPwrDischarge: $('val-dcpwr-discharge'),
+        acPwrInverter:  $('val-acpwr-inverter'),
         dcVolt1: $('val-dcvolt1'),
         dcCur1:  $('val-dccur1'),
         dcVolt2: $('val-dcvolt2'),
@@ -115,8 +117,10 @@
         barTemp1:   $('bar-temp1'),
         barTemp2:   $('bar-temp2'),
 
-        // Power ring
-        powerRing: $('power-ring'),
+        // Power rings
+        powerRingCharge:    $('power-ring-charge'),
+        powerRingDischarge: $('power-ring-discharge'),
+        powerRingInverter:  $('power-ring-inverter'),
 
         // Connection status
         wsDot:       $('ws-dot'),
@@ -332,8 +336,15 @@
 
     // --- Dashboard Update ---
     function updateDashboard(data) {
+        // Calculate power values
+        const dcP1 = data.dcP1 != null ? data.dcP1 : 0.0;
+        const dcP2 = data.dcP2 != null ? data.dcP2 : 0.0;
+        const acP2 = (data.acV2 != null && data.acA != null) ? (data.acV2 * data.acA) : 0.0;
+
         // Update text values
-        setText(dom.dcPwr, data.dcP1 != null ? data.dcP1.toFixed(2) : '0.00');
+        setText(dom.dcPwrCharge, dcP1.toFixed(2));
+        setText(dom.dcPwrDischarge, dcP2.toFixed(2));
+        setText(dom.acPwrInverter, acP2.toFixed(2));
         
         setText(dom.dcVolt1, data.dcV1 != null ? data.dcV1.toFixed(2) : '0.00');
         setText(dom.dcCur1, data.dcA1 != null ? data.dcA1.toFixed(2) : '0.00');
@@ -362,8 +373,12 @@
         setBar(dom.barTemp1, data.t1, cfg.maxTemp);
         setBar(dom.barTemp2, data.t2, cfg.maxTemp);
 
-        // Update power ring
-        updatePowerRing(data.dcP1 || 0);
+        // Update power rings
+        const maxDCPower = cfg.maxVoltage * cfg.maxCurrent;
+        const maxACPower = cfg.maxACVoltage * cfg.maxACCurrent;
+        setRing(dom.powerRingCharge, dcP1, maxDCPower);
+        setRing(dom.powerRingDischarge, dcP2, maxDCPower);
+        setRing(dom.powerRingInverter, acP2, maxACPower);
 
         // Update uptime if present
         if (data.uptime != null) {
@@ -383,13 +398,12 @@
         el.style.width = pct + '%';
     }
 
-    function updatePowerRing(power) {
-        if (!dom.powerRing) return;
-        const maxPower = cfg.maxVoltage * cfg.maxCurrent;
+    function setRing(ringEl, power, maxPower) {
+        if (!ringEl) return;
         const pct = Math.min(1, Math.max(0, power / maxPower));
         // circumference = 2 * PI * 52 ≈ 326.7
         const circumference = 326.7;
-        dom.powerRing.style.strokeDashoffset = circumference * (1 - pct);
+        ringEl.style.strokeDashoffset = circumference * (1 - pct);
     }
 
     function formatUptime(seconds) {

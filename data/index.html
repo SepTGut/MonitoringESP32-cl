@@ -73,21 +73,60 @@
                     <span class="page-subtitle" id="uptime-label">Uptime: --</span>
                 </div>
 
-                <!-- Hero Power Card -->
-                <div class="hero-card" id="card-power">
-                    <div class="hero-ring">
-                        <svg viewBox="0 0 120 120">
-                            <circle class="ring-bg" cx="60" cy="60" r="52"/>
-                            <circle class="ring-fill" cx="60" cy="60" r="52" id="power-ring"/>
-                        </svg>
-                        <div class="hero-value">
-                            <span id="val-dcpwr">0.00</span>
-                            <small>W</small>
+                <!-- Hero Highlights Container -->
+                <div class="highlights-container">
+                    <!-- Highlight 1: Charge Power (DC) -->
+                    <div class="hero-card" id="card-power-charge" data-type="charge">
+                        <div class="hero-ring">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                                <circle class="ring-fill" cx="60" cy="60" r="52" id="power-ring-charge"/>
+                            </svg>
+                            <div class="hero-value">
+                                <span id="val-dcpwr-charge">0.00</span>
+                                <small>W</small>
+                            </div>
+                        </div>
+                        <div class="hero-meta">
+                            <h3>Charge Power</h3>
+                            <p class="hero-desc">DC power going into the battery</p>
                         </div>
                     </div>
-                    <div class="hero-meta">
-                        <h3>Charge Power</h3>
-                        <p class="hero-desc">Real-time DC power going into the battery</p>
+
+                    <!-- Highlight 2: Power Draw (DC) -->
+                    <div class="hero-card" id="card-power-discharge" data-type="discharge">
+                        <div class="hero-ring">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                                <circle class="ring-fill" cx="60" cy="60" r="52" id="power-ring-discharge"/>
+                            </svg>
+                            <div class="hero-value">
+                                <span id="val-dcpwr-discharge">0.00</span>
+                                <small>W</small>
+                            </div>
+                        </div>
+                        <div class="hero-meta">
+                            <h3>Power Draw</h3>
+                            <p class="hero-desc">DC power from battery to inverter</p>
+                        </div>
+                    </div>
+
+                    <!-- Highlight 3: Inverter Output (AC) -->
+                    <div class="hero-card" id="card-power-inverter" data-type="inverter">
+                        <div class="hero-ring">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                                <circle class="ring-fill" cx="60" cy="60" r="52" id="power-ring-inverter"/>
+                            </svg>
+                            <div class="hero-value">
+                                <span id="val-acpwr-inverter">0.00</span>
+                                <small>W</small>
+                            </div>
+                        </div>
+                        <div class="hero-meta">
+                            <h3>Inverter AC Power</h3>
+                            <p class="hero-desc">Real-time AC side output power</p>
+                        </div>
                     </div>
                 </div>
 

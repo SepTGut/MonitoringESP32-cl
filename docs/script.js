@@ -1,5 +1,5 @@
 /* ============================================
-   Wind Turbine Monitor — Application Logic
+   Monitor SaPa — Application Logic
    ============================================ */
 
 (function () {
@@ -9,6 +9,8 @@
     const DEFAULT_CFG = {
         maxVoltage: 60,
         maxCurrent: 20,
+        maxACVoltage: 250,
+        maxACCurrent: 20,
         maxRPM: 3000,
         maxTemp: 100
     };
@@ -32,6 +34,17 @@
         pollMs: 100,
         wsPushMs: 500,
         poles: 4,
+        rpmMode: 0,
+        staEnabled: false,
+        staSSID: "Demo_Home_WiFi",
+        staPass: "12345678",
+        mqttEnabled: false,
+        mqttServer: "broker.hivemq.com",
+        mqttPort: 1883,
+        mqttUser: "",
+        mqttPass: "",
+        mqttTopic: "sapa/turbine/metrics",
+        mqttInterval: 5000,
         maxV: 60,
         maxA: 20,
         maxRPM: 3000,
@@ -78,22 +91,36 @@
 
     const dom = {
         // Dashboard values
-        dcPwr:   $('val-dcpwr'),
-        dcVolt:  $('val-dcvolt'),
-        dcCur:   $('val-dccur'),
-        acVolt:  $('val-acvolt'),
+        dcPwrCharge:    $('val-dcpwr-charge'),
+        dcPwrDischarge: $('val-dcpwr-discharge'),
+        acPwrInverter:  $('val-acpwr-inverter'),
+        dcVolt1: $('val-dcvolt1'),
+        dcCur1:  $('val-dccur1'),
+        dcVolt2: $('val-dcvolt2'),
+        dcCur2:  $('val-dccur2'),
+        acVolt1: $('val-acvolt1'),
+        acVolt2: $('val-acvolt2'),
+        acCur:   $('val-accur'),
         rpm:     $('val-rpm'),
-        temp:    $('val-temp'),
+        temp1:   $('val-temp1'),
+        temp2:   $('val-temp2'),
 
         // Progress bars
-        barDcVolt: $('bar-dcvolt'),
-        barDcCur:  $('bar-dccur'),
-        barAcVolt: $('bar-acvolt'),
+        barDcVolt1: $('bar-dcvolt1'),
+        barDcCur1:  $('bar-dccur1'),
+        barDcVolt2: $('bar-dcvolt2'),
+        barDcCur2:  $('bar-dccur2'),
+        barAcVolt1: $('bar-acvolt1'),
+        barAcVolt2: $('bar-acvolt2'),
+        barAcCur:   $('bar-accur'),
         barRpm:    $('bar-rpm'),
-        barTemp:   $('bar-temp'),
+        barTemp1:   $('bar-temp1'),
+        barTemp2:   $('bar-temp2'),
 
-        // Power ring
-        powerRing: $('power-ring'),
+        // Power rings
+        powerRingCharge:    $('power-ring-charge'),
+        powerRingDischarge: $('power-ring-discharge'),
+        powerRingInverter:  $('power-ring-inverter'),
 
         // Connection status
         wsDot:       $('ws-dot'),
@@ -119,6 +146,22 @@
         cfgPoll:   $('cfg-poll'),
         cfgWsPush: $('cfg-ws-push'),
         cfgPoles:  $('cfg-poles'),
+        cfgRpmMode: $('cfg-rpm-mode'),
+
+        // WiFi STA inputs
+        cfgStaEnabled:  $('cfg-sta-enabled'),
+        cfgStaSsid:     $('cfg-sta-ssid'),
+        cfgStaPass:     $('cfg-sta-pass'),
+
+        // MQTT inputs
+        cfgMqttEnabled:  $('cfg-mqtt-enabled'),
+        cfgMqttServer:   $('cfg-mqtt-server'),
+        cfgMqttPort:     $('cfg-mqtt-port'),
+        cfgMqttUser:     $('cfg-mqtt-user'),
+        cfgMqttPass:     $('cfg-mqtt-pass'),
+        cfgMqttTopic:    $('cfg-mqtt-topic'),
+        cfgMqttInterval: $('cfg-mqtt-interval'),
+
         cfgMaxV:   $('cfg-max-v'),
         cfgMaxA:   $('cfg-max-a'),
         cfgMaxRpm: $('cfg-max-rpm'),
@@ -128,6 +171,7 @@
         btnSave:    $('btn-save-cfg'),
         btnRestart: $('btn-restart'),
         togglePass: $('toggle-pass'),
+        toggleStaPass: $('toggle-sta-pass'),
 
         // System info
         sysFw:      $('sys-fw'),
@@ -183,6 +227,10 @@
         const inp = dom.cfgPass;
         inp.type = inp.type === 'password' ? 'text' : 'password';
     });
+    dom.toggleStaPass.addEventListener('click', () => {
+        const inp = dom.cfgStaPass;
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
 
     // --- Toast notifications ---
     let toastTimer = null;
@@ -204,20 +252,36 @@
 
         demoInterval = setInterval(() => {
             const now = Date.now();
-            const dcVolt = 24.0 + 2.5 * Math.sin(now / 5000);
-            const dcCur = 5.0 + 3.0 * Math.sin(now / 3000);
-            const dcPwr = dcVolt * dcCur;
-            const acVolt = 220.0 + 10.0 * Math.sin(now / 4000);
+            
+            const dcV1 = 24.0 + 2.5 * Math.sin(now / 5000);
+            const dcA1 = 5.0 + 3.0 * Math.sin(now / 3000);
+            const dcP1 = dcV1 * dcA1;
+
+            const dcV2 = 12.0 + 1.2 * Math.sin(now / 6000);
+            const dcA2 = 2.0 + 1.0 * Math.sin(now / 4000);
+            const dcP2 = dcV2 * dcA2;
+
+            const acV1 = 220.0 + 10.0 * Math.sin(now / 4000);
+            const acV2 = 218.0 + 8.0 * Math.sin(now / 4500);
+            const acA  = 1.5 + 0.5 * Math.sin(now / 3500);
+
             const rpm = 1200.0 + 400.0 * Math.sin(now / 6000);
-            const temp = 42.5 + 3.5 * Math.sin(now / 8000);
+            const t1 = 42.5 + 3.5 * Math.sin(now / 8000);
+            const t2 = 28.5 + 1.5 * Math.sin(now / 9000);
 
             const mockData = {
-                dcVolt: dcVolt,
-                dcCur: dcCur > 0 ? dcCur : 0,
-                dcPwr: dcPwr > 0 ? dcPwr : 0,
-                acVolt: acVolt,
+                dcV1: dcV1,
+                dcA1: dcA1 > 0 ? dcA1 : 0,
+                dcP1: dcP1 > 0 ? dcP1 : 0,
+                dcV2: dcV2,
+                dcA2: dcA2 > 0 ? dcA2 : 0,
+                dcP2: dcP2 > 0 ? dcP2 : 0,
+                acV1: acV1,
+                acV2: acV2,
+                acA: acA > 0 ? acA : 0,
                 rpm: rpm > 0 ? rpm : 0,
-                temp: temp,
+                t1: t1,
+                t2: t2,
                 uptime: Math.floor(performance.now() / 1000)
             };
             updateDashboard(mockData);
@@ -272,23 +336,49 @@
 
     // --- Dashboard Update ---
     function updateDashboard(data) {
+        // Calculate power values
+        const dcP1 = data.dcP1 != null ? data.dcP1 : 0.0;
+        const dcP2 = data.dcP2 != null ? data.dcP2 : 0.0;
+        const acP2 = (data.acV2 != null && data.acA != null) ? (data.acV2 * data.acA) : 0.0;
+
         // Update text values
-        setText(dom.dcPwr, data.dcPwr != null ? data.dcPwr.toFixed(2) : '0.00');
-        setText(dom.dcVolt, data.dcVolt != null ? data.dcVolt.toFixed(2) : '0.00');
-        setText(dom.dcCur, data.dcCur != null ? data.dcCur.toFixed(2) : '0.00');
-        setText(dom.acVolt, data.acVolt != null ? data.acVolt.toFixed(1) : '0.0');
+        setText(dom.dcPwrCharge, dcP1.toFixed(2));
+        setText(dom.dcPwrDischarge, dcP2.toFixed(2));
+        setText(dom.acPwrInverter, acP2.toFixed(2));
+        
+        setText(dom.dcVolt1, data.dcV1 != null ? data.dcV1.toFixed(2) : '0.00');
+        setText(dom.dcCur1, data.dcA1 != null ? data.dcA1.toFixed(2) : '0.00');
+        setText(dom.dcVolt2, data.dcV2 != null ? data.dcV2.toFixed(2) : '0.00');
+        setText(dom.dcCur2, data.dcA2 != null ? data.dcA2.toFixed(2) : '0.00');
+        
+        setText(dom.acVolt1, data.acV1 != null ? data.acV1.toFixed(1) : '0.0');
+        setText(dom.acVolt2, data.acV2 != null ? data.acV2.toFixed(1) : '0.0');
+        setText(dom.acCur, data.acA != null ? data.acA.toFixed(2) : '0.00');
+        
         setText(dom.rpm, data.rpm != null ? Math.round(data.rpm).toString() : '0');
-        setText(dom.temp, data.temp != null ? data.temp.toFixed(1) : '0.0');
+        setText(dom.temp1, data.t1 != null ? data.t1.toFixed(1) : '0.0');
+        setText(dom.temp2, data.t2 != null ? data.t2.toFixed(1) : '0.0');
 
         // Update progress bars (clamped 0-100%)
-        setBar(dom.barDcVolt, data.dcVolt, cfg.maxVoltage);
-        setBar(dom.barDcCur, data.dcCur, cfg.maxCurrent);
-        setBar(dom.barAcVolt, data.acVolt, cfg.maxVoltage);
+        setBar(dom.barDcVolt1, data.dcV1, cfg.maxVoltage);
+        setBar(dom.barDcCur1, data.dcA1, cfg.maxCurrent);
+        setBar(dom.barDcVolt2, data.dcV2, cfg.maxVoltage);
+        setBar(dom.barDcCur2, data.dcA2, cfg.maxCurrent);
+        
+        setBar(dom.barAcVolt1, data.acV1, cfg.maxACVoltage);
+        setBar(dom.barAcVolt2, data.acV2, cfg.maxACVoltage);
+        setBar(dom.barAcCur, data.acA, cfg.maxACCurrent);
+        
         setBar(dom.barRpm, data.rpm, cfg.maxRPM);
-        setBar(dom.barTemp, data.temp, cfg.maxTemp);
+        setBar(dom.barTemp1, data.t1, cfg.maxTemp);
+        setBar(dom.barTemp2, data.t2, cfg.maxTemp);
 
-        // Update power ring
-        updatePowerRing(data.dcPwr || 0);
+        // Update power rings
+        const maxDCPower = cfg.maxVoltage * cfg.maxCurrent;
+        const maxACPower = cfg.maxACVoltage * cfg.maxACCurrent;
+        setRing(dom.powerRingCharge, dcP1, maxDCPower);
+        setRing(dom.powerRingDischarge, dcP2, maxDCPower);
+        setRing(dom.powerRingInverter, acP2, maxACPower);
 
         // Update uptime if present
         if (data.uptime != null) {
@@ -308,13 +398,12 @@
         el.style.width = pct + '%';
     }
 
-    function updatePowerRing(power) {
-        if (!dom.powerRing) return;
-        const maxPower = cfg.maxVoltage * cfg.maxCurrent;
+    function setRing(ringEl, power, maxPower) {
+        if (!ringEl) return;
         const pct = Math.min(1, Math.max(0, power / maxPower));
         // circumference = 2 * PI * 52 ≈ 326.7
         const circumference = 326.7;
-        dom.powerRing.style.strokeDashoffset = circumference * (1 - pct);
+        ringEl.style.strokeDashoffset = circumference * (1 - pct);
     }
 
     function formatUptime(seconds) {
@@ -337,6 +426,22 @@
                 if (data.pollMs != null)  dom.cfgPoll.value = data.pollMs;
                 if (data.wsPushMs != null) dom.cfgWsPush.value = data.wsPushMs;
                 if (data.poles != null)   dom.cfgPoles.value = data.poles;
+                if (data.rpmMode != null) dom.cfgRpmMode.value = data.rpmMode;
+
+                // WiFi STA configuration load
+                if (data.staEnabled != null)  dom.cfgStaEnabled.checked = data.staEnabled;
+                if (data.staSSID != null)     dom.cfgStaSsid.value = data.staSSID;
+                if (data.staPass != null)     dom.cfgStaPass.value = data.staPass;
+
+                // MQTT configuration load
+                if (data.mqttEnabled != null)  dom.cfgMqttEnabled.checked = data.mqttEnabled;
+                if (data.mqttServer != null)   dom.cfgMqttServer.value = data.mqttServer;
+                if (data.mqttPort != null)     dom.cfgMqttPort.value = data.mqttPort;
+                if (data.mqttUser != null)     dom.cfgMqttUser.value = data.mqttUser;
+                if (data.mqttPass != null)     dom.cfgMqttPass.value = data.mqttPass;
+                if (data.mqttTopic != null)    dom.cfgMqttTopic.value = data.mqttTopic;
+                if (data.mqttInterval != null) dom.cfgMqttInterval.value = data.mqttInterval;
+
                 if (data.maxV != null)    { dom.cfgMaxV.value = data.maxV; cfg.maxVoltage = data.maxV; }
                 if (data.maxA != null)    { dom.cfgMaxA.value = data.maxA; cfg.maxCurrent = data.maxA; }
                 if (data.maxRPM != null)  { dom.cfgMaxRpm.value = data.maxRPM; cfg.maxRPM = data.maxRPM; }
@@ -369,6 +474,22 @@
         if (dom.cfgPoll.value)    payload.pollMs = parseInt(dom.cfgPoll.value, 10);
         if (dom.cfgWsPush.value)  payload.wsPushMs = parseInt(dom.cfgWsPush.value, 10);
         if (dom.cfgPoles.value)   payload.poles = parseInt(dom.cfgPoles.value, 10);
+        if (dom.cfgRpmMode.value !== '') payload.rpmMode = parseInt(dom.cfgRpmMode.value, 10);
+
+        // WiFi STA configuration save
+        payload.staEnabled = dom.cfgStaEnabled.checked;
+        payload.staSSID = dom.cfgStaSsid.value;
+        payload.staPass = dom.cfgStaPass.value;
+
+        // MQTT configuration save
+        payload.mqttEnabled = dom.cfgMqttEnabled.checked;
+        payload.mqttServer = dom.cfgMqttServer.value;
+        payload.mqttPort = parseInt(dom.cfgMqttPort.value, 10) || 1883;
+        payload.mqttUser = dom.cfgMqttUser.value;
+        payload.mqttPass = dom.cfgMqttPass.value;
+        payload.mqttTopic = dom.cfgMqttTopic.value;
+        payload.mqttInterval = parseInt(dom.cfgMqttInterval.value, 10) || 5000;
+
         if (dom.cfgMaxV.value)    payload.maxV = parseFloat(dom.cfgMaxV.value);
         if (dom.cfgMaxA.value)    payload.maxA = parseFloat(dom.cfgMaxA.value);
         if (dom.cfgMaxRpm.value)  payload.maxRPM = parseInt(dom.cfgMaxRpm.value, 10);

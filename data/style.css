@@ -441,16 +441,24 @@ body::after {
     border-radius: 20px;
 }
 
+/* --- Hero Highlights Layout --- */
+.highlights-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
 /* --- Hero Power Card (Glow styling) --- */
 .hero-card {
     display: flex;
     align-items: center;
-    gap: 3rem;
-    background: linear-gradient(135deg, var(--bg-card), rgba(45, 212, 191, 0.03));
+    gap: 1.5rem;
+    background: linear-gradient(135deg, var(--bg-card), rgba(255, 255, 255, 0.01));
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius);
-    padding: 2.5rem 3rem;
-    margin-bottom: 2rem;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 0;
     position: relative;
     overflow: hidden;
     box-shadow: 
@@ -459,6 +467,30 @@ body::after {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     animation: card-entrance 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+}
+
+/* Redefine accents locally inside each card type */
+.hero-card[data-type="charge"] {
+    --accent: #2dd4bf;
+    --accent-rgb: 45, 212, 191;
+    --accent-glow: rgba(45, 212, 191, 0.25);
+    background: linear-gradient(135deg, var(--bg-card), rgba(45, 212, 191, 0.03));
+}
+
+.hero-card[data-type="discharge"] {
+    --accent: #3b82f6;
+    --accent-rgb: 59, 130, 246;
+    --accent-glow: rgba(59, 130, 246, 0.25);
+    background: linear-gradient(135deg, var(--bg-card), rgba(59, 130, 246, 0.03));
+    animation-delay: 0.1s;
+}
+
+.hero-card[data-type="inverter"] {
+    --accent: #a855f7;
+    --accent-rgb: 168, 85, 247;
+    --accent-glow: rgba(168, 85, 247, 0.25);
+    background: linear-gradient(135deg, var(--bg-card), rgba(168, 85, 247, 0.03));
+    animation-delay: 0.2s;
 }
 
 .hero-card::before {
@@ -471,9 +503,9 @@ body::after {
     background: linear-gradient(
         115deg,
         transparent 40%,
-        rgba(45, 212, 191, 0.02) 45%,
-        rgba(45, 212, 191, 0.04) 50%,
-        rgba(45, 212, 191, 0.02) 55%,
+        rgba(var(--accent-rgb), 0.02) 45%,
+        rgba(var(--accent-rgb), 0.05) 50%,
+        rgba(var(--accent-rgb), 0.02) 55%,
         transparent 60%
     );
     animation: shimmer-sweep 8s ease-in-out infinite;
@@ -485,8 +517,8 @@ body::after {
     position: absolute;
     top: -50%;
     right: -10%;
-    width: 280px;
-    height: 280px;
+    width: 200px;
+    height: 200px;
     background: radial-gradient(circle, var(--accent-glow), transparent 70%);
     pointer-events: none;
     opacity: 0.4;
@@ -516,8 +548,8 @@ body::after {
 
 .hero-ring {
     position: relative;
-    width: 140px;
-    height: 140px;
+    width: 100px;
+    height: 100px;
     flex-shrink: 0;
 }
 
@@ -547,7 +579,7 @@ body::after {
 
 @keyframes ring-glow-pulse {
     0%, 100% { filter: drop-shadow(0 0 6px var(--accent-glow)); }
-    50%      { filter: drop-shadow(0 0 16px var(--accent-glow)) drop-shadow(0 0 30px rgba(45,212,191,0.1)); }
+    50%      { filter: drop-shadow(0 0 16px var(--accent-glow)) drop-shadow(0 0 30px rgba(var(--accent-rgb), 0.1)); }
 }
 
 .hero-value {
@@ -559,19 +591,19 @@ body::after {
 }
 
 .hero-value span {
-    font-size: 2.2rem;
+    font-size: 1.45rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--text-primary);
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
 }
 
 .hero-value small {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     font-weight: 600;
-    margin-top: -4px;
+    margin-top: -3px;
     letter-spacing: 0.5px;
 }
 
@@ -581,16 +613,16 @@ body::after {
 }
 
 .hero-meta h3 {
-    font-size: 1.4rem;
+    font-size: 1.15rem;
     font-weight: 600;
-    margin-bottom: 0.4rem;
-    letter-spacing: -0.3px;
+    margin-bottom: 0.2rem;
+    letter-spacing: -0.2px;
 }
 
 .hero-meta .hero-desc {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 0.82rem;
+    line-height: 1.4;
 }
 
 /* --- Metric Cards Grid (Glassmorphism layout) --- */
@@ -1081,11 +1113,16 @@ body::after {
         padding: 80px 1.2rem 2.5rem;
     }
 
+    .highlights-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
     .hero-card {
         flex-direction: column;
         text-align: center;
-        padding: 2rem 1.5rem;
-        gap: 2rem;
+        padding: 1.8rem 1.2rem;
+        gap: 1.2rem;
     }
 
     .metrics-grid {
