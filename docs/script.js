@@ -245,29 +245,30 @@
 
     // --- WebSocket Connection ---
     let demoInterval = null;
+    let simStep = 0;
     function startDemoSimulation() {
         if (demoInterval) return;
         setConnectionStatus(true);
         if (dom.wsLabel) dom.wsLabel.textContent = 'Live (Demo)';
 
         demoInterval = setInterval(() => {
-            const now = Date.now();
+            simStep += 0.1;
             
-            const dcV1 = 24.0 + 2.5 * Math.sin(now / 5000);
-            const dcA1 = 5.0 + 3.0 * Math.sin(now / 3000);
+            const dcV1 = 24.0 + 2.5 * Math.sin(simStep);
+            const dcA1 = 5.0 + 3.0 * Math.sin(simStep * 1.5);
             const dcP1 = dcV1 * dcA1;
 
-            const dcV2 = 12.0 + 1.2 * Math.sin(now / 6000);
-            const dcA2 = 2.0 + 1.0 * Math.sin(now / 4000);
+            const dcV2 = 12.0 + 1.2 * Math.sin(simStep * 0.8);
+            const dcA2 = 2.0 + 1.0 * Math.sin(simStep * 1.2);
             const dcP2 = dcV2 * dcA2;
 
-            const acV1 = 220.0 + 10.0 * Math.sin(now / 4000);
-            const acV2 = 218.0 + 8.0 * Math.sin(now / 4500);
-            const acA  = 1.5 + 0.5 * Math.sin(now / 3500);
+            const acV1 = 220.0 + 10.0 * Math.sin(simStep * 1.1);
+            const acV2 = 218.0 + 8.0 * Math.sin(simStep * 0.95);
+            const acA  = 1.5 + 0.5 * Math.sin(simStep * 1.3);
 
-            const rpm = 1200.0 + 400.0 * Math.sin(now / 6000);
-            const t1 = 42.5 + 3.5 * Math.sin(now / 8000);
-            const t2 = 28.5 + 1.5 * Math.sin(now / 9000);
+            const rpm = 1200.0 + 400.0 * Math.sin(simStep * 0.7);
+            const t1 = 42.5 + 3.5 * Math.sin(simStep * 0.5);
+            const t2 = 28.5 + 1.5 * Math.sin(simStep * 0.3);
 
             const mockData = {
                 dcV1: dcV1,
