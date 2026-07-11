@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wind Turbine Monitor</title>
+    <title>Monitor SaPa</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -86,13 +86,14 @@
                         </div>
                     </div>
                     <div class="hero-meta">
-                        <h3>Power Output</h3>
-                        <p class="hero-desc">Real-time DC power from the generator</p>
+                        <h3>Charge Power</h3>
+                        <p class="hero-desc">Real-time DC power going into the battery</p>
                     </div>
                 </div>
 
                 <!-- Metric Cards Grid -->
                 <div class="metrics-grid">
+                    <!-- Gen DC Channel 1 -->
                     <div class="metric-card" data-type="voltage">
                         <div class="metric-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -100,10 +101,10 @@
                             </svg>
                         </div>
                         <div class="metric-body">
-                            <span class="metric-label">DC Voltage</span>
-                            <span class="metric-value"><span id="val-dcvolt">0.00</span> <small>V</small></span>
+                            <span class="metric-label">Charge Voltage</span>
+                            <span class="metric-value"><span id="val-dcvolt1">0.00</span> <small>V</small></span>
                         </div>
-                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-dcvolt"></div></div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-dcvolt1"></div></div>
                     </div>
 
                     <div class="metric-card" data-type="current">
@@ -113,10 +114,51 @@
                             </svg>
                         </div>
                         <div class="metric-body">
-                            <span class="metric-label">DC Current</span>
-                            <span class="metric-value"><span id="val-dccur">0.00</span> <small>A</small></span>
+                            <span class="metric-label">Charge Current</span>
+                            <span class="metric-value"><span id="val-dccur1">0.00</span> <small>A</small></span>
                         </div>
-                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-dccur"></div></div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-dccur1"></div></div>
+                    </div>
+
+                    <!-- Load DC Channel 2 -->
+                    <div class="metric-card" data-type="voltage">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-label">Discharge Voltage</span>
+                            <span class="metric-value"><span id="val-dcvolt2">0.00</span> <small>V</small></span>
+                        </div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-dcvolt2"></div></div>
+                    </div>
+
+                    <div class="metric-card" data-type="current">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-label">Discharge Current</span>
+                            <span class="metric-value"><span id="val-dccur2">0.00</span> <small>A</small></span>
+                        </div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-dccur2"></div></div>
+                    </div>
+
+                    <!-- AC Channels -->
+                    <div class="metric-card" data-type="ac">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 12c2-4 4-8 6-8s4 8 6 8 4-8 6-8"/>
+                            </svg>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-label">Generator AC Volt</span>
+                            <span class="metric-value"><span id="val-acvolt1">0.0</span> <small>V</small></span>
+                        </div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-acvolt1"></div></div>
                     </div>
 
                     <div class="metric-card" data-type="ac">
@@ -126,12 +168,26 @@
                             </svg>
                         </div>
                         <div class="metric-body">
-                            <span class="metric-label">AC Voltage (RMS)</span>
-                            <span class="metric-value"><span id="val-acvolt">0.0</span> <small>V</small></span>
+                            <span class="metric-label">Inverter AC Volt</span>
+                            <span class="metric-value"><span id="val-acvolt2">0.0</span> <small>V</small></span>
                         </div>
-                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-acvolt"></div></div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-acvolt2"></div></div>
                     </div>
 
+                    <div class="metric-card" data-type="accur">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-label">Inverter AC Current</span>
+                            <span class="metric-value"><span id="val-accur">0.00</span> <small>A</small></span>
+                        </div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-accur"></div></div>
+                    </div>
+
+                    <!-- Physical Parameters -->
                     <div class="metric-card" data-type="rpm">
                         <div class="metric-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -153,10 +209,23 @@
                             </svg>
                         </div>
                         <div class="metric-body">
-                            <span class="metric-label">Generator Temp</span>
-                            <span class="metric-value"><span id="val-temp">0.0</span> <small>&deg;C</small></span>
+                            <span class="metric-label">Battery Temp</span>
+                            <span class="metric-value"><span id="val-temp1">0.0</span> <small>&deg;C</small></span>
                         </div>
-                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-temp"></div></div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-temp1"></div></div>
+                    </div>
+
+                    <div class="metric-card" data-type="temp">
+                        <div class="metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                            </svg>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-label">Ambient Temp</span>
+                            <span class="metric-value"><span id="val-temp2">0.0</span> <small>&deg;C</small></span>
+                        </div>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="bar-temp2"></div></div>
                     </div>
                 </div>
             </section>
@@ -258,6 +327,15 @@
                                 <label for="cfg-poles">BLDC Motor Poles</label>
                                 <input type="number" id="cfg-poles" placeholder="4" min="2" max="50" step="2">
                                 <span class="form-hint">Number of magnetic pole pairs on the rotor</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-rpm-mode">RPM Sensor Type</label>
+                                <select id="cfg-rpm-mode" style="width: 100%; padding: 0.6rem; border-radius: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-family: inherit; font-size: 0.9rem; cursor: pointer; outline: none; transition: border-color 0.2s;">
+                                    <option value="0" style="background: #0d1527; color: #fff;">3-Phase Internal Hall</option>
+                                    <option value="1" style="background: #0d1527; color: #fff;">1-Phase External Hall</option>
+                                    <option value="2" style="background: #0d1527; color: #fff;">Infrared RPM Module</option>
+                                </select>
+                                <span class="form-hint">Type of RPM feedback device wired to ESP32</span>
                             </div>
                         </div>
                     </div>

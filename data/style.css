@@ -38,6 +38,8 @@
     --rpm-glow: rgba(16, 185, 129, 0.3);
     --temp-color: #f97316;
     --temp-glow: rgba(249, 115, 22, 0.3);
+    --accur-color: #f43f5e;
+    --accur-glow: rgba(244, 63, 94, 0.3);
 
     --green: #10b981;
     --green-glow: rgba(16, 185, 129, 0.3);
@@ -593,6 +595,12 @@ body::after {
     border-color: rgba(249, 115, 22, 0.25);
 }
 
+.metric-card[data-type="accur"]::before { background: var(--accur-color); }
+.metric-card[data-type="accur"]:hover { 
+    box-shadow: 0 10px 30px rgba(244, 63, 94, 0.08), 0 4px 10px rgba(0, 0, 0, 0.2); 
+    border-color: rgba(244, 63, 94, 0.25);
+}
+
 .metric-icon {
     width: 42px;
     height: 42px;
@@ -624,6 +632,9 @@ body::after {
 
 .metric-card[data-type="temp"] .metric-icon { background: rgba(249, 115, 22, 0.06); color: var(--temp-color); }
 .metric-card[data-type="temp"]:hover .metric-icon { background: rgba(249, 115, 22, 0.12); filter: drop-shadow(0 0 6px var(--temp-glow)); }
+
+.metric-card[data-type="accur"] .metric-icon { background: rgba(244, 63, 94, 0.06); color: var(--accur-color); }
+.metric-card[data-type="accur"]:hover .metric-icon { background: rgba(244, 63, 94, 0.12); filter: drop-shadow(0 0 6px var(--accur-glow)); }
 
 .metric-body {
     display: flex;
@@ -674,6 +685,7 @@ body::after {
 .metric-card[data-type="ac"] .metric-bar-fill { background: linear-gradient(90deg, var(--ac-color), rgba(168, 85, 247, 0.3)); }
 .metric-card[data-type="rpm"] .metric-bar-fill { background: linear-gradient(90deg, var(--rpm-color), rgba(16, 185, 129, 0.3)); }
 .metric-card[data-type="temp"] .metric-bar-fill { background: linear-gradient(90deg, var(--temp-color), rgba(249, 115, 22, 0.3)); }
+.metric-card[data-type="accur"] .metric-bar-fill { background: linear-gradient(90deg, var(--accur-color), rgba(244, 63, 94, 0.3)); }
 
 /* --- Settings Page Form Styles --- */
 .settings-grid {

@@ -9,6 +9,7 @@ struct AppConfig {
     uint32_t sensorPollMs;
     uint32_t wsPushMs;
     uint32_t bldcPoles;
+    uint8_t rpmMode; // 0=3-phase Hall, 1=Single Hall, 2=IR RPM module
     
     // WiFi Station (STA) Client Mode configs
     bool staEnabled;

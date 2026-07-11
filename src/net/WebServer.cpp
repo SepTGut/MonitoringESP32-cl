@@ -46,7 +46,7 @@ void DashboardServer::begin() {
     // Get current config
     server.on("/api/config", HTTP_GET, [](AsyncWebServerRequest *request){
         AsyncResponseStream *response = request->beginResponseStream("application/json");
-        StaticJsonDocument<512> doc;
+        StaticJsonDocument<1024> doc;
         configManager.serialize(doc);
         serializeJson(doc, *response);
         request->send(response);
@@ -118,16 +118,25 @@ void DashboardServer::pushData() {
         // Get thread-safe copy of sensor data
         SensorData data = sysState.getData();
         
-        StaticJsonDocument<256> doc;
-        doc["acVolt"] = data.acVoltage;
-        doc["dcVolt"] = data.dcVoltage;
-        doc["dcCur"] = data.dcCurrent;
-        doc["dcPwr"] = data.dcPower;
+        StaticJsonDocument<384> doc;
+        doc["dcV1"] = data.dcVoltage1;
+        doc["dcA1"] = data.dcCurrent1;
+        doc["dcP1"] = data.dcPower1;
+        
+        doc["dcV2"] = data.dcVoltage2;
+        doc["dcA2"] = data.dcCurrent2;
+        doc["dcP2"] = data.dcPower2;
+
+        doc["acV1"] = data.acVoltage1;
+        doc["acV2"] = data.acVoltage2;
+        doc["acA"]  = data.acCurrent;
+
         doc["rpm"] = data.rpm;
-        doc["temp"] = data.temperatureC;
+        doc["t1"]  = data.temperature1;
+        doc["t2"]  = data.temperature2;
         doc["uptime"] = esp_timer_get_time() / 1000000ULL;
         
-        char buffer[256];
+        char buffer[384];
         size_t len = serializeJson(doc, buffer);
         ws.textAll(buffer, len);
     }

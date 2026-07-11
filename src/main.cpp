@@ -5,7 +5,7 @@
 
 void setup() {
     Serial.begin(115200);
-    Serial.println("\n--- Portable Wind Turbine Monitoring System ---");
+    Serial.println("\n--- Monitor SaPa ---");
 
     // Initialize configuration manager (loads settings from LittleFS)
     configManager.begin();

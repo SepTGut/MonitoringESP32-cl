@@ -18,4 +18,5 @@ private:
     uint8_t _address;
     uint8_t _sda;
     uint8_t _scl;
+    bool _enabled;
 };

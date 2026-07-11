@@ -8,8 +8,13 @@ class TemperatureSensor {
 public:
     TemperatureSensor(uint8_t pin);
     void begin();
-    float getTemperature();
     void requestTemperature();
+
+    // Read temperature by sensor index on the OneWire bus
+    float getTemperature(uint8_t index = 0);
+
+    // Get the number of sensors detected on the bus
+    uint8_t getDeviceCount();
 
 private:
     uint8_t _pin;

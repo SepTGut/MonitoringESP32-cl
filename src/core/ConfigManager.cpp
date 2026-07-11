@@ -15,6 +15,7 @@ ConfigManager::ConfigManager() {
     _config.sensorPollMs = SENSOR_POLL_MS;
     _config.wsPushMs = WEBSOCKET_PUSH_MS;
     _config.bldcPoles = BLDC_POLES;
+    _config.rpmMode = RPM_MODE_HALL_3; // Default to 3-phase Hall
     
     // Station and MQTT defaults
     _config.staEnabled = false;
@@ -58,7 +59,7 @@ bool ConfigManager::load() {
         return false;
     }
 
-    StaticJsonDocument<512> doc;
+    StaticJsonDocument<1024> doc;
     DeserializationError error = deserializeJson(doc, configFile);
     configFile.close();
 
@@ -79,7 +80,7 @@ bool ConfigManager::save() {
         return false;
     }
 
-    StaticJsonDocument<512> doc;
+    StaticJsonDocument<1024> doc;
     serialize(doc);
 
     if (serializeJson(doc, configFile) == 0) {
@@ -114,6 +115,9 @@ void ConfigManager::updateFromJson(const JsonVariant& json) {
     }
     if (json["poles"].is<uint32_t>()) {
         _config.bldcPoles = json["poles"];
+    }
+    if (json["rpmMode"].is<uint8_t>()) {
+        _config.rpmMode = json["rpmMode"];
     }
 
     // WiFi STA config deserialization
@@ -176,6 +180,7 @@ void ConfigManager::serialize(JsonDocument& doc) const {
     doc["pollMs"] = _config.sensorPollMs;
     doc["wsPushMs"] = _config.wsPushMs;
     doc["poles"] = _config.bldcPoles;
+    doc["rpmMode"] = _config.rpmMode;
 
     // WiFi STA config serialization
     doc["staEnabled"] = _config.staEnabled;

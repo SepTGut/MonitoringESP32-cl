@@ -5,17 +5,31 @@ TemperatureSensor::TemperatureSensor(uint8_t pin)
 }
 
 void TemperatureSensor::begin() {
+    if (_pin >= 40) return;
     _sensors.begin();
     // Non-blocking mode (asynchronous)
     _sensors.setWaitForConversion(false);
+    
+    uint8_t count = _sensors.getDeviceCount();
+    Serial.printf("[DS18B20] Found %d sensor(s) on pin %d\n", count, _pin);
 }
 
 void TemperatureSensor::requestTemperature() {
-    _sensors.requestTemperatures(); // Initiate conversion
+    if (_pin >= 40) return;
+    _sensors.requestTemperatures(); // Initiate conversion for all sensors on bus
 }
 
-float TemperatureSensor::getTemperature() {
-    // Note: getTempCByIndex returns 85.0 if conversion isn't complete, 
-    // but with waitForConversion(false) you need to manage timing yourself (e.g., wait 750ms between request and read)
-    return _sensors.getTempCByIndex(0);
+float TemperatureSensor::getTemperature(uint8_t index) {
+    if (_pin >= 40) return 0.0f;
+    float temp = _sensors.getTempCByIndex(index);
+    // DallasTemperature returns DEVICE_DISCONNECTED_C (-127) if sensor not found
+    if (temp == DEVICE_DISCONNECTED_C) {
+        return 0.0f;
+    }
+    return temp;
+}
+
+uint8_t TemperatureSensor::getDeviceCount() {
+    if (_pin >= 40) return 0;
+    return _sensors.getDeviceCount();
 }
