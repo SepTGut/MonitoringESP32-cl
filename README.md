@@ -75,7 +75,7 @@ The web interface is a single-page application (SPA) styled with custom variable
 - **WiFi / AP Configuration** — Change gateway SSID/Password
 - **WiFi Client Mode (STA)** — Enable home router connections to fetch local NTP/cloud access
 - **MQTT Telemetry Card** — Configure broker IP, port, credentials, topics, and intervals
-- **Sensor TIMING & Type** — Poll schedules, WebSocket speed, BLDC poles, and **RPM Sensor Type** selector (3-Phase internal Hall / 1-Phase external Hall / IR module)
+- **Sensor TIMING & Type** — Poll schedules, WebSocket speed, BLDC poles, and **RPM Sensor Type** selector (3-Phase internal Hall / 2-Phase internal Hall / 1-Phase external Hall / IR module)
 - **System Information** — Free heap, firmware version, and connected client counters
 
 ---
@@ -91,7 +91,7 @@ flowchart TB
         ZMPT["ZMPT101B ×2<br/>AC Voltages"]
         ZMCT["ZMCT103C ×1<br/>AC Current"]
         INA["INA226 ×2<br/>DC V / I / P"]
-        HALL["BLDCHall<br/>RPM via ISR (GP34/35/39)"]
+        HALL["BLDCHall<br/>RPM via ISR (GP34/35/39)<br/>Supports 1/2/3-phase modes"]
         DS18["DS18B20 ×2<br/>OneWire Temperatures"]
         ST[SensorTask Loop<br/>10Hz default]
         ZMPT --> ST
@@ -147,8 +147,8 @@ All analog sensors must be wired to **ADC1 pins** because ADC2 is disabled when 
 | **INA226 #1** | I2C SDA / SCL | `GPIO 21 / 22` | I2C (addr `0x40`) | DC Charge Side (Before Battery) |
 | **INA226 #2** | I2C SDA / SCL | `GPIO 21 / 22` | I2C (addr `0x41`) | DC Discharge Side (After Battery) |
 | **Primary Hall / IR** | Interrupt | `GPIO 34` | Digital Input | Ext Hall / IR / Phase A |
-| **BLDC Hall B** | Interrupt | `GPIO 35` | Digital Input | 3-Phase Internal Hall B |
-| **BLDC Hall C** | Interrupt | `GPIO 39` | Digital Input | 3-Phase Internal Hall C |
+| **BLDC Hall B** | Interrupt | `GPIO 35` | Digital Input | 2-Phase & 3-Phase Internal Hall B |
+| **BLDC Hall C** | Interrupt | `GPIO 39` | Digital Input | 3-Phase Internal Hall C only |
 | **DS18B20 ×2** | 1-Wire | `GPIO 4` | Dallas 1-Wire | Shared bus: Battery (index 0), Ambient (index 1) |
 
 ---
@@ -202,8 +202,8 @@ Returns config database:
   "pass": "12345678",
   "pollMs": 100,
   "wsPushMs": 500,
-  "poles": 4,
-  "rpmMode": 0,
+  "poles": 12,
+  "rpmMode": 3,
   "staEnabled": false,
   "staSSID": "",
   "staPass": "",
@@ -223,9 +223,12 @@ Returns config database:
 
 ### `POST /api/config`
 Updates configurations dynamically. Set `rpmMode` to:
-- `0`: 3-Phase Internal Hall
-- `1`: 1-Phase External Hall
-- `2`: Infrared Tachometer Module
+- `0`: 3-Phase Internal Hall (3 sensors, GPIO 34/35/39 — `pulsesPerRev = poles × 3`)
+- `1`: 1-Phase External Hall (1 sensor, GPIO 34 — `pulsesPerRev = poles`)
+- `2`: Infrared Tachometer Module (1 sensor, GPIO 34 — `pulsesPerRev = 1`)
+- `3`: 2-Phase Internal Hall (2 sensors, GPIO 34/35 — `pulsesPerRev = poles × 2`)
+
+> **Note:** Default config uses `poles: 12` and `rpmMode: 3` for the LG WD-M1070D6 Inverter Direct Drive motor (12 rotor magnets, 2 built-in Hall sensors).
 
 ---
 

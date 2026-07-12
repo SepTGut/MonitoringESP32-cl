@@ -26,6 +26,7 @@
 #define RPM_MODE_HALL_3    0  // 3-phase internal hall (3 pins)
 #define RPM_MODE_HALL_1    1  // Single external hall sensor
 #define RPM_MODE_IR        2  // Infrared RPM module
+#define RPM_MODE_HALL_2    3  // 2-phase internal hall (2 pins)
 
 // DS18B20 1-Wire Pin (both sensors on same bus)
 #define PIN_DS18B20     4
@@ -37,7 +38,7 @@
 #define SENSOR_POLL_MS      100    // 10Hz sampling
 #define WEBSOCKET_PUSH_MS   500    // 2Hz dashboard updates
 
-#define BLDC_POLES      4  // Number of magnetic poles on the BLDC motor
+#define BLDC_POLES      12 // Number of magnetic poles (rotor magnets) — LG WD-M1070D6 DD motor
 
 // --- FEATURE FLAGS ---
 // #define ENABLE_SD_LOGGING

@@ -74,6 +74,10 @@ void BLDCHall::begin(uint8_t mode, uint8_t poles) {
         _pins[0] = 34; // PIN_RPM_INPUT
         _pins[1] = 35; // PIN_BLDC_HALL_B
         _pins[2] = 39; // PIN_BLDC_HALL_C
+    } else if (_mode == 3) { // RPM_MODE_HALL_2
+        _numSensors = 2;
+        _pins[0] = 34; // PIN_RPM_INPUT  (Hall A)
+        _pins[1] = 35; // PIN_BLDC_HALL_B (Hall B)
     } else { // RPM_MODE_HALL_1 or RPM_MODE_IR
         _numSensors = 1;
         _pins[0] = 34; // PIN_RPM_INPUT
@@ -118,6 +122,9 @@ float BLDCHall::getRPM() {
     if (_mode == 0) { // RPM_MODE_HALL_3
         // With 3 sensors, each revolution generates (poles * 3) pulses
         pulsesPerRev = (float)_poles * 3.0f;
+    } else if (_mode == 3) { // RPM_MODE_HALL_2
+        // With 2 sensors, each revolution generates (poles * 2) pulses
+        pulsesPerRev = (float)_poles * 2.0f;
     } else if (_mode == 1) { // RPM_MODE_HALL_1
         // With 1 Hall sensor triggering on rotor magnets
         pulsesPerRev = (float)_poles;
